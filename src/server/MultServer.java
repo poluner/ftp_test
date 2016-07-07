@@ -6,11 +6,11 @@ public class MultServer {
 
 	public static void main(String[] args) {
 		try {
-			ServerSocket serverSocket = new ServerSocket(21);// 21端口监听命令
+			ServerSocket serverSocket_command = new ServerSocket(21);// 21端口监听命令
+			ServerSocket serverSocket_file = new ServerSocket(4700);// 4700端口监听文件
 			while (true) {
-				new ServerThread(serverSocket.accept(), new ServerSocket(4700)).start();// 4700端口监听文件
+				new ServerThread(serverSocket_command.accept(), serverSocket_file.accept()).start();
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

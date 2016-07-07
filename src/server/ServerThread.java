@@ -9,11 +9,11 @@ import java.net.Socket;
 
 public class ServerThread extends Thread {
 	Socket socket_command;
-	ServerSocket serverSocket_file;
+	Socket socket_file;
 
-	ServerThread(Socket socket_command, ServerSocket serverSocket_file) {
+	ServerThread(Socket socket_command, Socket socket_file) {
 		this.socket_command = socket_command;
-		this.serverSocket_file = serverSocket_file;
+		this.socket_file = socket_file;
 	}
 
 	public void run() {
@@ -23,7 +23,6 @@ public class ServerThread extends Thread {
 			String fileName = (String) ois.readObject();
 			System.out.println(command + " " + fileName);
 
-			Socket socket_file = serverSocket_file.accept();
 			InputStream is = socket_file.getInputStream();
 
 			File file = new File(fileName);

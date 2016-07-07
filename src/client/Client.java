@@ -28,7 +28,7 @@ public class Client {
 			OutputStream os = socket_file.getOutputStream();
 
 			int c;
-			while ((c = fis.read()) != -1) {
+			while ((c = fis.read()) != -1) {// 文件结束返回-1
 				os.write(c);
 			}
 			os.close();// 关闭
