@@ -1,10 +1,11 @@
 package client;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -12,31 +13,33 @@ public class Client {
 
 	public static void main(String[] args) {
 		try {
-			Socket socket_command = new Socket("127.0.0.1", 21);// 21端口监听命令
+			Socket socket_cmd = new Socket("172.16.11.197", 21);// 21端口监听命令
 
 			Scanner sin = new Scanner(System.in);
-			String command = sin.next();
-			String pathName = sin.next();
+			String cmd = sin.next();
+			int port_file = sin.nextInt();// 输入本机墙外端口
+			ObjectOutputStream oos = new ObjectOutputStream(socket_cmd.getOutputStream());// 序列化
+			oos.writeObject(cmd);
+			oos.writeObject(InetAddress.getLocalHost().getHostAddress());// 发送本机ip
+			oos.writeInt(port_file);// 发送本机墙外端口
+			oos.flush();// 一定要刷新
+			ServerSocket serverSocket_file = new ServerSocket(port_file);// 在这个墙外端口监听
+			Socket socket_file = serverSocket_file.accept();// 与服务器连接
 
-			File file = new File(pathName);
+			String pathName = sin.next();// 想要在服务器下载的文件的绝对路径
+			oos.writeObject(pathName);// 传输服务器中文件的绝对路径
+			oos.close();// 关闭流！
 
-			ObjectOutputStream oos = new ObjectOutputStream(socket_command.getOutputStream());// 序列化
-			oos.writeObject(command);
-			oos.writeObject(file.getName());// 传输文件名
-
-			int port_file = new ObjectInputStream(socket_command.getInputStream()).readInt();// 接收服务器给出的高端端口号
-			Socket socket_file = new Socket("127.0.0.1", port_file);// 文件传输端口号由服务器给出
-
-			FileInputStream fis = new FileInputStream(file);
-			OutputStream os = socket_file.getOutputStream();
+			FileOutputStream fos = new FileOutputStream(new File(pathName).getName());// 接收的文件放在相对路径
+			InputStream is = socket_file.getInputStream();
 
 			int c;
-			while ((c = fis.read()) != -1) {// 文件结束返回-1
-				os.write(c);
+			while ((c = is.read()) != -1) {// 流结束返回-1
+				fos.write(c);
 			}
-			os.close();// 一定要刷新，close的时候会自动刷新
+			fos.close();
 
-			System.out.println("发送完了");
+			System.out.println("接收完了");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
